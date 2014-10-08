@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project activeEnvironment="Default" name="FileBridgeCMIS" soapui-version="5.0.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:RestService" wadlVersion="http://wadl.dev.java.net/2009/02" name="Central Authentication Service" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart=""/><con:endpoints><con:endpoint>http://LELAN-PO:8080/</con:endpoint><con:endpoint>http://casf.mgdis.fr</con:endpoint></con:endpoints><con:resource name="ServiceTicket" path="/{tenant}/v1/tickets/{tgt}"><con:settings/><con:parameters><con:parameter required="true"><con:name>tgt</con:name><con:value>TGT</con:value><con:style>TEMPLATE</con:style><con:default>TGT</con:default><con:path xsi:nil="true"/><con:description xsi:nil="true"/></con:parameter><con:parameter><con:name>tenant</con:name><con:value>myTenant</con:value><con:style>TEMPLATE</con:style><con:default>myTenant</con:default></con:parameter></con:parameters><con:method name="Get Service Ticket" method="POST"><con:settings/><con:parameters/><con:representation type="REQUEST"><con:mediaType>application/x-www-form-urlencoded</con:mediaType><con:params/></con:representation><con:request name="Request 1" mediaType="application/x-www-form-urlencoded" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://casf.mgdis.fr</con:endpoint><con:request>service=myService</con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="tgt" value="TGT_1234" xmlns="http://eviware.com/soapui/config"/></con:parameters><con:parameterOrder><con:entry>tgt</con:entry><con:entry>tenant</con:entry></con:parameterOrder></con:request></con:method></con:resource><con:resource name="SamlValidate" path="/{tenant}/samlValidate"><con:settings/><con:parameters><con:parameter><con:name>tenant</con:name><con:value>myTenant</con:value><con:style>TEMPLATE</con:style><con:default>myTenant</con:default></con:parameter><con:parameter><con:name>TARGET</con:name><con:value>myService</con:value><con:style>QUERY</con:style><con:default>myService</con:default></con:parameter></con:parameters><con:method name="Get SAML attributes" method="POST"><con:settings/><con:parameters><con:parameter required="true"><con:name>TARGET</con:name><con:value>myService</con:value><con:style>QUERY</con:style><con:default>myService</con:default></con:parameter></con:parameters><con:representation type="REQUEST"><con:params/></con:representation><con:request name="Request 1" mediaType="text/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://casf.mgdis.fr</con:endpoint><con:request><![CDATA[<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+	<SOAP-ENV:Header/>
+	<SOAP-ENV:Body>
+		<samlp:Request xmlns:samlp="urn:oasis:names:tc:SAML:1.0:protocol" MajorVersion="1" MinorVersion="1" RequestID="_172.16.10.250.1024506224022" IssueInstant="2014-04-01T14:03:44.022Z">
+			<samlp:AssertionArtifact>TGT_1234</samlp:AssertionArtifact>
+		</samlp:Request>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><entry key="TARGET" value="myService" xmlns="http://eviware.com/soapui/config"/></con:parameters><con:parameterOrder><con:entry>tenant</con:entry><con:entry>TARGET</con:entry></con:parameterOrder></con:request></con:method></con:resource><con:resource name="Authentication" path="/{tenant}/v1/tickets"><con:settings/><con:parameters><con:parameter><con:name>tenant</con:name><con:value>myTenant</con:value><con:style>TEMPLATE</con:style><con:default>myTenant</con:default></con:parameter></con:parameters><con:method name="Authenticate" method="POST"><con:settings/><con:parameters/><con:representation type="REQUEST"><con:mediaType>application/x-www-form-urlencoded</con:mediaType><con:params/></con:representation><con:request name="Request 1" mediaType="application/x-www-form-urlencoded" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://casf.mgdis.fr</con:endpoint><con:request>username=john-d&amp;password=john-d</con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/><con:parameterOrder><con:entry>tenant</con:entry></con:parameterOrder></con:request></con:method></con:resource></con:interface><con:restMockService port="8080" path="/" host="LELAN-PO" name="mock CAS"><con:settings/><con:properties/><con:restMockAction name="/myTenant/v1/tickets/{TGT}" method="POST" resourcePath="/myTenant/v1/tickets/"><con:settings/><con:defaultResponse>Response 2</con:defaultResponse><con:dispatchStyle>SCRIPT</con:dispatchStyle><con:dispatchPath>def requestPath = mockRequest.getPath()
+if( requestPath.contains("12345") )
+{
+	return "Response 1"
+}
+
+/*
+// Examples showing how to match based on path, query param and header
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeadeList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncodig Header List: " + acceptEncodingHeadeList
+
+if( acceptEncodingHeadeList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+*/
+</con:dispatchPath><con:response name="Response 1" httpResponseStatus="200" mediaType="text/plain"><con:settings/><con:responseContent>ST_12345</con:responseContent></con:response><con:response name="Response 2" httpResponseStatus="401"><con:settings/><con:responseContent/><con:header><con:name>WWW-Authenticate</con:name><con:value/></con:header></con:response></con:restMockAction><con:restMockAction name="/myTenant/samlValidate?TARGET={serviceName}" method="POST" resourcePath="/myTenant/samlValidate"><con:settings/><con:defaultResponse xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Examples showing how to match based on path, query param and header
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeadeList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncodig Header List: " + acceptEncodingHeadeList
+
+if( acceptEncodingHeadeList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+*/
+</con:dispatchPath><con:response name="Response 1" httpResponseStatus="200"><con:settings/><con:responseContent><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+	<SOAP-ENV:Body>
+		<saml1p:Response xmlns:saml1p="urn:oasis:names:tc:SAML:1.0:protocol" IssueInstant="2014-08-06T14:38:16.378Z" MajorVersion="1" MinorVersion="1" Recipient="En6wAJmAV1FpLVfX6qjjE0" ResponseID="_1a56c5cec14cc9ef8ba0fe52518f113b">
+			<saml1p:Status>
+				<saml1p:StatusCode Value="saml1p:Success"/>
+			</saml1p:Status>
+			<saml1:Assertion xmlns:saml1="urn:oasis:names:tc:SAML:1.0:assertion" AssertionID="_871bc0aae975537ef2927a61156ab2d2" IssueInstant="2014-08-06T14:38:16.378Z" Issuer="localhost" MajorVersion="1" MinorVersion="1">
+				<saml1:Conditions NotBefore="2014-08-06T14:38:16.378Z" NotOnOrAfter="2014-08-06T14:38:46.378Z">
+					<saml1:AudienceRestrictionCondition>
+						<saml1:Audience>En6wAJmAV1FpLVfX6qjjE0</saml1:Audience>
+					</saml1:AudienceRestrictionCondition>
+				</saml1:Conditions>
+				<saml1:AuthenticationStatement AuthenticationInstant="2014-08-06T14:29:54.809Z" AuthenticationMethod="urn:oasis:names:tc:SAML:1.0:am:unspecified">
+					<saml1:Subject>
+						<saml1:NameIdentifier>admin</saml1:NameIdentifier>
+						<saml1:SubjectConfirmation>
+							<saml1:ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:artifact</saml1:ConfirmationMethod>
+						</saml1:SubjectConfirmation>
+					</saml1:Subject>
+				</saml1:AuthenticationStatement>
+				<saml1:AttributeStatement>
+					<saml1:Subject>
+						<saml1:NameIdentifier>admin</saml1:NameIdentifier>
+						<saml1:SubjectConfirmation>
+							<saml1:ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:artifact</saml1:ConfirmationMethod>
+						</saml1:SubjectConfirmation>
+					</saml1:Subject>
+					<saml1:Attribute AttributeName="SCIM.displayName" AttributeNamespace="http://www.ja-sig.org/products/cas/">
+						<saml1:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">admin</saml1:AttributeValue>
+					</saml1:Attribute>
+					<saml1:Attribute AttributeName="SCIM.userName" AttributeNamespace="http://www.ja-sig.org/products/cas/">
+						<saml1:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">admin</saml1:AttributeValue>
+					</saml1:Attribute>
+					<saml1:Attribute AttributeName="SCIM.name.familyName" AttributeNamespace="http://www.ja-sig.org/products/cas/">
+						<saml1:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">admin</saml1:AttributeValue>
+					</saml1:Attribute>
+					<saml1:Attribute AttributeName="SCIM.groups" AttributeNamespace="http://www.ja-sig.org/products/cas/">
+						<saml1:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">redacteur</saml1:AttributeValue>
+						<saml1:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">administrator</saml1:AttributeValue>
+					</saml1:Attribute>
+				</saml1:AttributeStatement>
+			</saml1:Assertion>
+		</saml1p:Response>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+]]></con:responseContent></con:response></con:restMockAction><con:restMockAction name="/myTenant/v1/tickets" method="POST" resourcePath="/myTenant/v1/tickets"><con:settings/><con:defaultResponse xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Examples showing how to match based on path, query param and header
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeadeList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncodig Header List: " + acceptEncodingHeadeList
+
+if( acceptEncodingHeadeList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+*/
+</con:dispatchPath><con:response name="Response 1" httpResponseStatus="201" mediaType="text/xml"><con:settings/><con:responseContent><![CDATA[<html>
+	<head>
+		<title>201 The request has been fulfilled and resulted in a new resource being created</title>
+	</head>
+	<body>
+		<h1>TGT Created</h1>
+		<form action="http://cas.example.org/myTenant/v1/tickets/TGT-560-YlksW2UZbxCgPhlOwFkf1tNgygGNC9EiS5bK2IbB7LiS1gNgUj-cas.example.org" method="POST">
+			Service: <input type="text" name="service" value=""/>
+			<br/>
+			<input type="submit" value="Submit"/>
+		</form>
+	</body>
+</html>]]></con:responseContent><con:header><con:name>Location</con:name><con:value>http://cas.example.org/TGT_12345</con:value></con:header></con:response></con:restMockAction></con:restMockService><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/></con:soapui-project>
