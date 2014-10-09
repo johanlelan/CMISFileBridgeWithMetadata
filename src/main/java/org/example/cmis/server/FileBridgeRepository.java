@@ -32,6 +32,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -120,6 +121,7 @@ import org.apache.chemistry.opencmis.commons.impl.dataobjects.PermissionMappingD
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertiesImpl;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertyBooleanImpl;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertyDateTimeImpl;
+import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertyDecimalImpl;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertyIdImpl;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertyIntegerImpl;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.PropertyStringImpl;
@@ -894,6 +896,9 @@ public class FileBridgeRepository {
             }
         }
 
+        // reset entity cache
+        threadLocalObject.remove();
+        
         return compileObjectData(context, newFile, null, false, false,
                 userReadOnly, objectInfos);
     }
@@ -939,7 +944,6 @@ public class FileBridgeRepository {
             String versionServicesId, String filter,
             Boolean includeAllowableActions, Boolean includeAcl,
             ObjectInfoHandler objectInfos) {
-        LOG.info("> getObject");
         boolean userReadOnly = checkUser(context, false);
 
         // check id
@@ -967,7 +971,6 @@ public class FileBridgeRepository {
         // gather properties
         ObjectData objectData = compileObjectData(context, file, filterCollection, iaa, iacl,
                 userReadOnly, objectInfos);
-        LOG.info("< getObject {}", file.getAbsolutePath());
         return objectData;
     }
 
@@ -1334,7 +1337,6 @@ public class FileBridgeRepository {
     public ObjectList query(CallContext context, String statement,
             Boolean includeAllowableActions, BigInteger maxItems,
             BigInteger skipCount, ObjectInfoHandler objectInfos) {
-LOG.info("> query");
         boolean userReadOnly = checkUser(context, false);
 
         Matcher matcher = IN_FOLDER_QUERY_PATTERN.matcher(statement.trim());
@@ -1461,7 +1463,6 @@ LOG.info("> query");
         }
 
         result.setNumItems(BigInteger.valueOf(count));
-        LOG.info("< query");
         return result;
     }
 
@@ -1488,7 +1489,6 @@ LOG.info("> query");
                 threadLocalObject.get().getId().equals(getId(file))) {
             return threadLocalObject.get();
         }
-        LOG.info("> compileObjectData");
         ObjectDataImpl result = new ObjectDataImpl();
         ObjectInfoImpl objectInfo = new ObjectInfoImpl();
 
@@ -1510,7 +1510,6 @@ LOG.info("> query");
             objectInfos.addObjectInfo(objectInfo);
         }
         threadLocalObject.set(result);
-        LOG.info("< compileObjectData");
         return result;
     }
 
@@ -1621,12 +1620,24 @@ LOG.info("> query");
             // +JLL
             if (!typeId.equals(BaseTypeId.CMIS_FOLDER.value())) {
                 for (Map.Entry<String, Object> prop : metadata.entrySet()) {
-                    // if (prop.getKey().equals(PropertyIds.OBJECT_TYPE_ID)) {
-                    // typeId = prop.getValue().toString();
-                    // }
-                    //((PropertiesImpl) result).removeProperty(prop.getKey());
-                    addPropertyString(result, typeId, filter, prop.getKey(),
-                            prop.getValue().toString());
+                    String key = prop.getKey();
+                    Object value = prop.getValue();
+                    if (value instanceof Boolean) {
+                        addPropertyBoolean(result, typeId, filter, key,
+                                (Boolean) value);
+                    } else if (value instanceof BigInteger) {
+                        addPropertyBigInteger(result, typeId, filter, key,
+                                (BigInteger) value);
+                    } else if (value instanceof BigDecimal) {
+                        addPropertyBigDecimal(result, typeId, filter, key,
+                                (BigDecimal) value);
+                    } else if (value instanceof GregorianCalendar) {
+                        addPropertyDateTime(result, typeId, filter, key,
+                                (GregorianCalendar) value);
+                    } else {
+						addPropertyString(result, typeId, filter, key,
+                                value.toString());
+                    }
                 }
             }
             // _JLL
@@ -1752,7 +1763,6 @@ LOG.info("> query");
                         PropertyIds.CONTENT_STREAM_ID, null);
             }
 
-            LOG.debug("Compiling properties : {} / {}" + objectInfo.getFileName(), result);
             return result;
         } catch (CmisBaseException cbe) {
             throw cbe;
@@ -1960,6 +1970,15 @@ LOG.info("> query");
         }
 
         props.addProperty(new PropertyIntegerImpl(id, value));
+    }
+    
+    private void addPropertyBigDecimal(PropertiesImpl props, String typeId,
+            Set<String> filter, String id, BigDecimal value) {
+        if (!checkAddProperty(props, typeId, filter, id)) {
+            return;
+        }
+
+        props.addProperty(new PropertyDecimalImpl(id, value));
     }
 
     private void addPropertyBoolean(PropertiesImpl props, String typeId,

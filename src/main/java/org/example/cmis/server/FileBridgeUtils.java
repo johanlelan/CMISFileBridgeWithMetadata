@@ -28,6 +28,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -203,31 +205,79 @@ public final class FileBridgeUtils {
      */
     public static void writeMetadata(File newFile, Properties properties) {
         PrintWriter out = null;
+        String absolutePath = newFile.getAbsolutePath();
+        StringBuilder stb = new StringBuilder();
+        Map<String, Object> metadata = new LinkedHashMap<String, Object>();
+
+        if (allMetadata.containsKey(absolutePath)) {
+            // load old properties
+            metadata = allMetadata.get(absolutePath);
+        }
+        else {
+            if (newFile.exists()) {
+                metadata = readMapMetadata(newFile);
+            }
+        }
+        
+        for (PropertyData<?> propertyData : properties.getPropertyList()) {
+            String key = propertyData.getId();
+            Object value = propertyData.getFirstValue();
+            metadata.put(key, value);
+        }
+        
         try {
             out = new PrintWriter(newFile);
-            String absolutePath = newFile.getAbsolutePath();
-            StringBuilder stb = new StringBuilder();
-            Map<String, Object> metadata = new LinkedHashMap<String, Object>();
+            
+            stb.append("{");
 
-            if (allMetadata.containsKey(absolutePath)) {
-                // load old properties
-                metadata = allMetadata.get(absolutePath);
+            // serialize
+            String separator = ",\r\n";
+            for (Map.Entry<String, Object> meta : metadata.entrySet()) {
+                String key = meta.getKey();
+                Object value = meta.getValue();
+                if (value instanceof String) {
+                    stb.append(String.format("\"" + key + "\":\"" + value + "\"" + separator));
+                }
+                else if(value instanceof Boolean) {
+                    stb.append(String.format("\"" + key + "\":" + value + separator));
+                }
+                else if(value instanceof GregorianCalendar) {
+                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                    formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    String utcDateTime = formatter.format(((GregorianCalendar)value).getTime());
+                    stb.append(String.format("\"" + key + "\":\"" + utcDateTime + "\"" + separator));
+                }
+                else
+                {
+                    stb.append(String.format("\"" + key + "\":" + value + separator));
+                }
             }
-
+            /*
             // update with new one
             for (PropertyData<?> propertyData : properties.getPropertyList()) {
-                metadata.put(propertyData.getId(), propertyData.getFirstValue());
+                String key = propertyData.getId();
+                Object value = propertyData.getFirstValue();
+                metadata.put(key, value);
+                if (propertyData instanceof PropertyStringImpl ||
+                        propertyData instanceof PropertyIdImpl ||
+                        propertyData instanceof PropertyHtmlImpl ||
+                        propertyData instanceof PropertyUriImpl) {
+                    stb.append(String.format("\"" + key + "\":\"" + value + "\"" + separator));
+                }
+                else if(propertyData instanceof PropertyDateTimeImpl) {
+                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                    formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    String utcDateTime = formatter.format(((GregorianCalendar)value).getTime());
+                    stb.append(String.format("\"" + key + "\":\"" + utcDateTime + "\"" + separator));
+                }
+                else
+                {
+                    stb.append(String.format("\"" + key + "\":" + value +separator));
+                }
             }
-
-            stb.append("{");
-            stb.append("\r\n");
-            for (Map.Entry<String, Object> entry : metadata.entrySet()) {
-                stb.append(String.format("\"" + entry.getKey() + "\":\""
-                        + entry.getValue() + "\""));
-                stb.append("\r\n");
-            }
+            */
             // remove last comma
-            String json = stb.toString().substring(0, stb.length() - 2) + "\r\n}";
+            String json = stb.toString().substring(0, stb.length() - separator.length()) + "}";
             out.print(json);
             out.flush();
             allMetadata.put(absolutePath, metadata);

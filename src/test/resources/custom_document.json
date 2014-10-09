@@ -1,0 +1,82 @@
+{
+    "id": "custom:document",
+    "localName": "Custom Document",
+    "localNamespace": "http://chemistry.apache.org/opencmis/fileshare",
+    "displayName": "Document with metadata",
+    "queryName": "custom:document",
+    "description": "This type allow a few metadata in addition of standard CMIS properties",
+    "baseId": "cmis:document",
+    "parentId": "cmis:document",
+    "creatable": true,
+    "fileable": true,
+    "queryable": true,
+    "fulltextIndexed": false,
+    "includedInSupertypeQuery": true,
+    "controllablePolicy": false,
+    "controllableACL": false,
+    "typeMutability": {
+        "create": true,
+        "update": true,
+        "delete": false
+    },
+    "versionable": false,
+    "contentStreamAllowed": "allowed",
+    "propertyDefinitions": {
+        "custom:property1": {
+            "id": "custom:property1",
+            "localName": "businessIdentifier",
+            "displayName": "Business identifier",
+            "queryName": "custom:property1",
+            "description": "Identifier for querying documents",
+            "propertyType": "string",
+            "cardinality": "single",
+            "updatability": "readwrite",
+            "inherited": false,
+            "required": false,
+            "queryable": true,
+            "orderable": true
+        }
+		"custom:property2": {
+            "id": "custom:property2",
+            "localName": "businessDateTime",
+            "displayName": "Business date of a task",
+            "queryName": "custom:property2",
+            "description": "Date for an event",
+            "propertyType": "datetime",
+            "cardinality": "single",
+            "updatability": "readwrite",
+            "inherited": false,
+            "required": false,
+            "queryable": true,
+            "orderable": true
+        }
+		"custom:property3": {
+            "id": "custom:property3",
+            "localName": "businessOpinion",
+            "displayName": "Business opinion",
+            "queryName": "custom:property3",
+            "description": "Opinion for a question",
+            "propertyType": "boolean",
+            "cardinality": "single",
+            "updatability": "readwrite",
+            "inherited": false,
+            "required": false,
+            "queryable": true,
+            "orderable": true
+        }
+		"custom:property4": {
+            "id": "custom:property4",
+            "localName": "businessAmount",
+            "displayName": "Business amount",
+            "queryName": "custom:property4",
+            "description": "Amount of a product",
+            "propertyType": "decimal",
+            "cardinality": "single",
+            "updatability": "readwrite",
+            "inherited": false,
+            "required": false,
+            "queryable": true,
+            "orderable": true
+        }
+    }
+}
